@@ -33,7 +33,7 @@ PidFile /opt/var/run/tor.pid
 DataDirectory /opt/var/lib/tor
 ExcludeExitNodes {RU},{UA},{AM},{KG}
 StrictNodes 1
-#SocksPort 127.0.0.1:9050 # Локальный Socks прокси
+SocksPort 127.0.0.1:9050 # Локальный Socks прокси
 VirtualAddrNetwork 10.254.0.0/16 # Виртуальные адреса для .onion ресурсов
 AutomapHostsOnResolve 1
 TransPort 192.168.1.1:9040 # Адрес LAN интерфейса
