@@ -1,8 +1,8 @@
 #!/bin/sh
 
 echo Download Lists 
-wget -O /opt/etc/runblock/runblock.dnsmasq https://raw.githubusercontent.com/blackcofee/uablock-list/master/urlblock
-wget -O /opt/etc/runblock/runblock.ipset https://raw.githubusercontent.com/blackcofee/uablock-list/master/ipblock
+wget -q -O /opt/etc/rublock/rublock.dnsmasq https://raw.githubusercontent.com/sunriser1/rublock-vpn/master/urlblock.txt
+wget -q -O /opt/etc/rublock/rublock.ips https://raw.githubusercontent.com/sunriser1/rublock-vpn/master/ipblock.txt
 
 echo Generation Block List
 cd /opt/etc/runblock
