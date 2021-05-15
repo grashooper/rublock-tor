@@ -1,8 +1,8 @@
 #!/bin/sh
 
 echo Download Lists 
-wget -q -O /opt/etc/rublock/rublock.dnsmasq https://raw.githubusercontent.com/sunriser1/rublock-vpn/master/urlblock.txt
-wget -q -O /opt/etc/rublock/rublock.ips https://raw.githubusercontent.com/sunriser1/rublock-vpn/master/ipblock.txt
+wget -q -O /opt/etc/rublock/rublock.dnsmasq https://raw.githubusercontent.com/grashooper/rublock-tor/master/opt/bin/urlblock.txt
+wget -q -O /opt/etc/rublock/rublock.ips https://raw.githubusercontent.com/grashooper/rublock-tor/master/opt/bin/ipblock.txt
 
 echo Generation Block List
 cd /opt/etc/runblock
