@@ -4,8 +4,8 @@ echo Check update
 opkg update && opkg upgrade
 
 # Если используется TOR с флэшки
-echo Install packages
-opkg install tor tor-geoip lua
+# echo Install packages
+# opkg install tor tor-geoip lua
 
 echo Make directories
 mkdir -p /opt/lib/lua /opt/etc/runblock
