@@ -2,20 +2,21 @@
 
 local config = {
     blSource = "antizapret", -- antizapret или rublacklist
-    groupBySld = 16, -- количество поддоменов после которого в список вносится весь домен второго уровня целиком
-    neverGroupMasks = { "^%a%a%a?.%a%a$" }, -- не праспространять на org.ru, net.ua и аналогичные
+    groupBySld = 32, -- количество поддоменов после которого в список вносится весь домен второго уровня целиком
+    neverGroupMasks = { "^%a%a%a?.%a%a$" }, -- не распространять на org.ru, net.ua и аналогичные
     neverGroupDomains = { ["livejournal.com"] = true, ["facebook.com"] = true , ["vk.com"] = true },
     stripWww = true,
-    convertIdn = false,
+    convertIdn = true,
     torifyNsLookups = false, -- отправлять DNS запросы заблокированных доменов через TOR
     blMinimumEntries = 1000, -- костыль если список получился короче, значит что-то пошло не так и конфиги не обновляем
-    dnsmasqConfigPath = "/opt/etc/runblock/runblock.dnsmasq",
-    ipsetConfigPath = "/opt/etc/runblock/runblock.ipset",
+    dnsmasqConfigPath = "/etc/runblock/runblock.dnsmasq",
+    ipsetConfigPath = "/etc/runblock/runblock.ipset",
     ipsetDns = "rublack-dns",
+    ipsetIp = "rublack-ip",
     torDnsAddr = "127.0.0.1#9053"
 }
- 
- 
+
+
 local function prequire(package)
     local result, err = pcall(function() require(package) end)
     if not result then
@@ -23,12 +24,12 @@ local function prequire(package)
     end
     return require(package) -- return the package value
 end
- 
+
 local idn = prequire("idn")
 if (not idn) and (config.convertIdn) then
     error("you need either put idn.lua (github.com/haste/lua-idn) in script dir  or set 'convertIdn' to false")
 end
- 
+
 local http = prequire("socket.http")
 if not http then
     local ltn12 = require("ltn12")
@@ -36,7 +37,7 @@ end
 if not ltn12 then
     error("you need either install luasocket package (prefered) or put ltn12.lua in script dir")
 end
- 
+
 local function hex2unicode(code)
     local n = tonumber(code, 16)
     if (n < 128) then
@@ -47,7 +48,7 @@ local function hex2unicode(code)
         return string.char(224 + ((n - (n % 4096)) / 4096), 128 + (((n % 4096) - (n % 64)) / 64), 128 + (n % 64))
     end
 end
- 
+
 local function rublacklistExtractDomains()
     local currentRecord = ""
     local buffer = ""
@@ -60,7 +61,7 @@ local function rublacklistExtractDomains()
         else
             buffer = buffer .. chunk
         end
- 
+
         while true do
             local escapeStart, escapeEnd, escapedChar = buffer:find("\\(.)", bufferPos)
             if escapedChar then
@@ -100,7 +101,7 @@ local function rublacklistExtractDomains()
         return (retVal)
     end
 end
- 
+
 local function antizapretExtractDomains()
     local currentRecord = ""
     local buffer = ""
@@ -137,7 +138,7 @@ local function antizapretExtractDomains()
         return (retVal)
     end
 end
- 
+
 local function normalizeFqdn()
     return function(chunk)
         if chunk and (chunk ~= "") then
@@ -149,7 +150,7 @@ local function normalizeFqdn()
         return (chunk)
     end
 end
- 
+
 local function cunstructTables(bltables)
     bltables = bltables or { fqdn = {}, sdcount = {}, ips = {} }
     local f = function(blEntry, err)
@@ -174,7 +175,7 @@ local function cunstructTables(bltables)
     end
     return f, bltables
 end
- 
+
 local function compactDomainList(fqdnList, subdomainsCount)
     local domainTable = {}
     local numEntries = 0
@@ -222,9 +223,11 @@ end
 
 local function generateIpsetConfig(configPath, ipList)
     local configFile = assert(io.open(configPath, "w"), "could not open ipset config")
+    configFile:write(string.format("flush %s-tmp\n", config.ipsetIp))
     for ipaddr in pairs(ipList) do
-        configFile:write(string.format("%s\n", ipaddr))
+        configFile:write(string.format("add %s %s\n", config.ipsetIp, ipaddr))
     end
+    configFile:write(string.format("swap %s %s-tmp\n", config.ipsetIp, config.ipsetIp))
     configFile:close()
 end
 
@@ -233,10 +236,10 @@ local retVal, retCode, url
 local output, bltables = cunstructTables()
 if config.blSource == "rublacklist" then
     output = ltn12.sink.chain(ltn12.filter.chain(rublacklistExtractDomains(), normalizeFqdn()), output)
-    url = "https://reestr.rublacklist.net/api/v3/ips-only/json"
+    url = "http://reestr.rublacklist.net/api/current"
 elseif config.blSource == "antizapret" then
     output = ltn12.sink.chain(ltn12.filter.chain(antizapretExtractDomains(), normalizeFqdn()), output)
-    url = "https://api.antizapret.info/group.php?data=domain"
+    url = "http://api.antizapret.info/group.php?data=domain"
 else
     error("blacklist source should be either 'rublacklist' or 'antizapret'")
 end
