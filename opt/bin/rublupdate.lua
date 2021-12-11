@@ -236,7 +236,7 @@ local retVal, retCode, url
 local output, bltables = cunstructTables()
 if config.blSource == "rublacklist" then
     output = ltn12.sink.chain(ltn12.filter.chain(rublacklistExtractDomains(), normalizeFqdn()), output)
-    url = "http://web.archive.org/web/20151212051822/http://reestr.rublacklist.net/api/current"
+    url = "http://web.archive.org/web/20151212051822if_/http://reestr.rublacklist.net/api/current"
 elseif config.blSource == "antizapret" then
     output = ltn12.sink.chain(ltn12.filter.chain(antizapretExtractDomains(), normalizeFqdn()), output)
     url = "http://web.archive.org/web/20190612213600if_/https://api.antizapret.info/group.php?data=domain"
