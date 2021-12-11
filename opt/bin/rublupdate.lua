@@ -239,7 +239,7 @@ if config.blSource == "rublacklist" then
     url = "http://web.archive.org/web/20151212051822/http://reestr.rublacklist.net/api/current"
 elseif config.blSource == "antizapret" then
     output = ltn12.sink.chain(ltn12.filter.chain(antizapretExtractDomains(), normalizeFqdn()), output)
-    url = "http://web.archive.org/web/20190612213600/http://api.antizapret.info/group.php?data=domain"
+    url = "http://web.archive.org/web/20190612213600if_/https://api.antizapret.info/group.php?data=domain"
 else
     error("blacklist source should be either 'rublacklist' or 'antizapret'")
 end
